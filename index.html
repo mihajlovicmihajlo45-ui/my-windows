@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Моя Вінда</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: Arial, sans-serif; overflow: hidden; }
+        #desktop { width: 100%; height: calc(100vh - 40px); background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe') no-repeat center center/cover; position: relative; padding: 20px; box-sizing: border-box; }
+        .icon { width: 70px; text-align: center; color: white; cursor: pointer; text-shadow: 1px 1px 3px black; }
+        .icon img { width: 50px; height: 50px; }
+        .window { width: 400px; height: 300px; background: white; border: 2px solid #0078d7; position: absolute; top: 20%; left: 30%; display: flex; flex-direction: column; box-shadow: 0px 4px 15px rgba(0,0,0,0.5); border-radius: 6px; }
+        .window-header { background: #0078d7; color: white; padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { background: #ff5f56; color: white; border: none; padding: 2px 8px; cursor: pointer; font-weight: bold; border-radius: 3px; }
+        .window-content { flex-grow: 1; }
+        .window-content textarea { width: 100%; height: 100%; border: none; resize: none; box-sizing: border-box; padding: 10px; font-size: 16px; }
+        #taskbar { width: 100%; height: 40px; background: #1c1c1c; display: flex; align-items: center; padding: 0 10px; box-sizing: border-box; }
+        #start-button { background: #0078d7; color: white; border: none; padding: 6px 15px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div id="desktop">
+        <div class="icon" onclick="openWindow()">
+            <img src="https://cdn-icons-png.flaticon.com/512/564/564429.png" alt="Блокнот">
+            <br><span>Блокнот</span>
+        </div>
+
+        <div id="my-window" class="window" style="display: none;">
+            <div class="window-header">
+                <span>Мій Блокнот</span>
+                <button class="close-btn" onclick="closeWindow()">X</button>
+            </div>
+            <div class="window-content">
+                <textarea placeholder="Тут можна писати текст..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="taskbar">
+        <button id="start-button">Пуск</button>
+    </div>
+
+    <script>
+        function openWindow() { document.getElementById('my-window').style.display = 'flex'; }
+        function closeWindow() { document.getElementById('my-window').style.display = 'none'; }
+    </script>
+</body>
+</html>
