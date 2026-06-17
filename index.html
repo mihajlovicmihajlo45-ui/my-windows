@@ -3,420 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sewiwewi OS - Meme & Game Ultimate Edition</title>
+    <title>sewiwewi OS - Ultimate Final Edition</title>
     <style>
         * { box-sizing: border-box; }
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Segoe UI', Roboto, sans-serif;
             overflow: hidden; user-select: none;
-            background: #000; color: #fff;
-            transition: background 0.3s, color 0.3s;
+            background: #000000; color: #ffffff;
         }
 
-        /* --- RETRO BIOS MENU --- */
+        /* Завантажувальний екран */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; z-index: 9999999; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            font-family: monospace; color: #00ffcc; font-size: 20px;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #333333;
+            border-top: 5px solid #ff0055; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* БІОС */
         #bios-menu {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #0000aa; font-family: 'Courier New', monospace;
-            padding: 40px; display: flex; flex-direction: column; z-index: 99999;
-            border: 10px double #fff;
+            padding: 40px; display: none; flex-direction: column; z-index: 999999;
+            border: 10px double #ffffff;
         }
-        .bios-header { text-align: center; border-bottom: 2px solid #fff; padding-bottom: 15px; margin-bottom: 30px; }
-        .bios-title { font-size: 28px; font-weight: bold; color: #ffff00; }
-        .bios-content { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; max-width: 700px; margin: 0 auto; width: 100%; }
+        .bios-header { text-align: center; border-bottom: 2px solid #ffffff; padding-bottom: 15px; margin-bottom: 30px; }
+        .bios-title { font-size: 26px; font-weight: bold; color: #ffff00; }
+        .bios-content { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; max-width: 700px; margin: 0 auto; width: 100%; }
         .bios-option {
             background: #000088; border: 2px dashed #00ffcc; padding: 20px;
             border-radius: 8px; cursor: pointer; transition: all 0.2s;
-            display: flex; justify-content: space-between; align-items: center; color: #fff;
+            display: flex; flex-direction: column; color: #ffffff;
         }
-        .bios-option:hover { background: #ffff00; color: #000; border-style: solid; border-color: #000; transform: scale(1.02); }
+        .bios-option:hover { background: #ffff00; color: #000000; border-style: solid; border-color: #000000; transform: scale(1.02); }
 
-        /* --- DESKTOP --- */
+        /* Робочий стіл */
         #desktop {
-            width: 100%; height: calc(100vh - 48px);
+            width: 100%; height: calc(100vh - 55px);
             position: relative; padding: 25px;
-            display: none; flex-direction: row; flex-wrap: wrap; gap: 25px;
-            align-content: flex-start; justify-content: flex-start;
+            display: none; flex-direction: row; gap: 25px;
+            align-content: flex-start; justify-content: flex-start; flex-wrap: wrap;
+            background-size: cover; background-position: center;
         }
-
-        /* ТЕМИ ДЛЯ GAMING MODE */
-        body.mode-gaming.theme-dark #desktop { background: linear-gradient(135deg, #0f0f14 0%, #1a1a24 100%); color: #fff; }
-        body.mode-gaming.theme-light #desktop { background: linear-gradient(135deg, #e0e0eb 0%, #f5f5f5 100%); color: #000; }
-        body.mode-joke #desktop { background: radial-gradient(circle, #240a0a 0%, #050101 100%); }
-
-        /* ІКОНКИ */
-        .icon {
-            width: 115px; height: 115px; padding: 12px; border-radius: 14px;
-            text-align: center; cursor: pointer; transition: all 0.2s ease-in-out;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            color: inherit;
-        }
-        body.theme-light .icon { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
-        .icon:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px rgba(255, 0, 85, 0.3); border-color: #ff0055; }
-        body.mode-joke .icon:hover { box-shadow: 0 8px 20px rgba(0, 255, 204, 0.4); border-color: #00ffcc; }
-        .icon-emoji { font-size: 42px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
-        .icon span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-
-        /* ВІКНА СИСТЕМИ */
-        .window {
-            width: 750px; height: 500px; 
-            background: rgba(22, 22, 30, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            position: absolute; display: none; flex-direction: column;
-            border-radius: 12px; overflow: hidden; z-index: 10;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-        }
-        body.theme-light .window { background: rgba(255, 255, 255, 0.98); border-color: rgba(0, 0, 0, 0.15); color: #000; box-shadow: 0 25px 60px rgba(0,0,0,0.15); }
-        body.mode-joke .window { border-color: #00ffcc; box-shadow: 0 0 30px rgba(0,255,204,0.2); }
-
-        .window-header { background: rgba(0,0,0,0.2); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        body.theme-light .window-header { border-bottom-color: rgba(0,0,0,0.05); }
-        .window-title { font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .win-btn { width: 24px; height: 24px; border: none; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 10px; }
-        .close-btn { background: #ff5f56; color: #fff; }
-
-        .window-content { flex-grow: 1; width: 100%; height: 100%; padding: 20px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
-        body.theme-light .window-content { background: #fff; }
-
-        /* --- АНІМАЦІЯ БОМБИ --- */
-        .bomb-container { text-align: center; margin: auto; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .bomb-icon { font-size: 80px; animation: pulseBomb 1s infinite alternate ease-in-out; }
-        @keyframes pulseBomb {
-            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,0,0,0.5)); }
-            100% { transform: scale(1.2); filter: drop-shadow(0 0 35px #ff0000); }
-        }
-        .bomb-timer { font-family: monospace; font-size: 48px; color: #ff3333; font-weight: bold; text-shadow: 0 0 10px rgba(255,0,0,0.3); }
-        .shake-screen { animation: screenShake 0.1s infinite; }
-        @keyframes screenShake {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-4px, 4px); }
-            75% { transform: translate(4px, -4px); }
-        }
-
-        /* --- ГРА ПЕГУН --- */
-        .pigeon-game { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; gap: 15px; }
-        .pigeon-sprite { font-size: 90px; animation: floatPigeon 3s infinite ease-in-out; }
-        @keyframes floatPigeon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-        .rage-bar-bg { width: 80%; height: 24px; background: #333; border-radius: 12px; overflow: hidden; border: 2px solid #fff; margin: 10px 0; }
-        .rage-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffcc, #ff3333); transition: width 0.2s; }
-        .feed-btn { padding: 12px 30px; font-size: 16px; font-weight: bold; background: #00ffcc; color: #000; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.1s; }
-        .feed-btn:active { transform: scale(0.92); }
-
-        /* СПАМ ВІРУСНІ ВІКНА */
-        .spam-win {
-            position: absolute; width: 220px; background: #f0f0f0; color: #000;
-            border: 2px solid #ff3333; border-radius: 6px; padding: 10px; z-index: 50000;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5); font-size: 13px; text-align: center;
-            font-weight: bold; animation: popUp 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popUp { from { transform: scale(0); } to { transform: scale(1); } }
-
-        /* ТАСКБАР */
-        #taskbar {
-            width: 100%; height: 48px; background: rgba(15, 15, 20, 0.95);
-            position: fixed; bottom: 0; left: 0; z-index: 10000;
-            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
-            border-top: 2px solid #ff0055; animation: rgbLine 6s infinite linear;
-        }
-        body.theme-light #taskbar { background: rgba(230, 230, 240, 0.95); border-top-color: #00ffcc; }
-        @keyframes rgbLine { 0% { border-top-color: #ff0055; } 33% { border-top-color: #00ffcc; } 66% { border-top-color: #ffff00; } 100% { border-top-color: #ff0055; } }
         
-        .tb-btn { background: #252538; color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 13px; }
-        body.theme-light .tb-btn { background: #fff; color: #000; border-color: rgba(0,0,0,0.2); }
-        .tb-btn:hover { background: #ff0055; color: white; }
+        .bg-black { background: #000000 !important; }
+        .bg-gaming { background: linear-gradient(135deg, #0f001a 0%, #000a14 100%) !important; border: 2px solid #ff0055; }
+        .bg-neon { background: linear-gradient(135deg, #1a0000 0%, #0a0010 100%) !important; }
+        .bg-meme { 
+            background: #111a24 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 100 100"><path d="M20,60 Q35,35 60,35 Q75,35 85,45 Q90,35 85,25 Q70,25 60,30 Q40,20 25,40 Z" fill="%23ffffff" opacity="0.15"/><text x="25" y="80" font-family="sans-serif" font-weight="bold" font-size="8" fill="%23ffffff" opacity="0.1">PEDJUNCHIK ENGINE</text></svg>') no-repeat center !important;
+            background-size: 450px 450px !important;
+        }
+
+        /* Червоний RGB стиль */
+        body.red-rgb-theme .window { border-color: #ff0000 !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4) !important; }
+        body.red-rgb-theme .window-header { background: rgba(40, 0, 0, 0.8) !important; }
+        body.red-rgb-theme .icon:hover { border-color: #ff0000 !important; box-shadow: 0 5px 15px rgba(255, 0, 0, 0.5) !important; }
+        body.red-rgb-theme #taskbar { border-top: 1px solid rgba(255, 0, 0, 0.4) !important; background: rgba(15, 5, 5, 0.95) !important; }
+
+        /* ХУД Балансу */
+        #roblox-balance-hud {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(15, 15, 25, 0.85); border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px; padding: 10px 20px; display: none; align-items: center; gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 9999;
+        }
+        .hud-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #aaaaaa; font-weight: 700; }
+        .hud-value { font-size: 22px; font-weight: 800; color: #ffbd2e; font-family: monospace; }
+
+        /* Іконки */
+        .icon {
+            width: 110px; height: 110px; padding: 10px; border-radius: 14px;
+            text-align: center; cursor: pointer; transition: all 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); color: #ffffff;
+            backdrop-filter: blur(5px);
+        }
+        .icon:hover { transform: translateY(-4px); border-color: #ff0055; box-shadow: 0 5px 15px rgba(255, 0, 85, 0.3); }
+        .icon-emoji { font-size: 38px; }
+        .icon span { font-size: 11px; font-weight: 600; text-transform: uppercase; }
+
+        /* Вікна */
+        .window {
+            width: 680px; height: 440px; position: absolute; display: flex; flex-direction: column;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15); background: #14141f; color: #ffffff;
+        }
+        .window.maximize {
+            width: 100% !important; height: calc(100vh - 55px) !important;
+            top: 0 !important; left: 0 !important; border-radius: 0px !important;
+        }
+        .window-header { 
+            background: rgba(0,0,0,0.4); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid rgba(255,255,255,0.08); cursor: move;
+        }
+        .window-title { font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+        .win-btn { width: 22px; height: 22px; border: none; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 9px; }
+        .max-btn { background: #ffbd2e; color: #5d3e00; margin-right: 5px; }
+        .cls-btn { background: #ff5f56; color: #ffffff; }
+        .window-content { flex-grow: 1; width: 100%; height: 100%; position: relative; overflow: auto; background: #1a1a26; }
+
+        /* Консоль */
+        .console-box { width: 100%; height: 100%; background: #050505; color: #00ff66; font-family: monospace; padding: 15px; display: flex; flex-direction: column; }
+        .console-log { flex-grow: 1; overflow-y: auto; white-space: pre-wrap; margin-bottom: 10px; font-size: 14px; line-height: 1.4; }
+        .console-input-line { display: flex; align-items: center; gap: 8px; }
+        .console-input { flex-grow: 1; background: transparent; border: none; color: #ffffff; outline: none; font-family: monospace; font-size: 14px; }
+
+        /* Контекстне меню */
+        #context-menu {
+            position: absolute; display: none; background: #1e1e2d; border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px; width: 240px; z-index: 1000000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); padding: 5px 0;
+        }
+        .context-item { padding: 10px 15px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #ffffff; }
+        .context-item:hover { background: #ff0055; color: #ffffff; }
+
+        /* Ігри та Шаблони */
+        .game-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; text-align: center; padding: 20px; }
+        .game-btn { font-size: 65px; background: none; border: none; cursor: pointer; transition: transform 0.1s; }
+        .game-btn:active { transform: scale(0.88); }
+        .action-btn { background: #ff0055; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .action-btn:hover { opacity: 0.9; }
+
+        /* Таскбар */
+        #taskbar {
+            width: 100%; height: 55px; background: rgba(10, 10, 15, 0.9); position: fixed; bottom: 0; left: 0; z-index: 999998;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 15px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px);
+        }
+        .tb-section { display: flex; align-items: center; gap: 8px; }
+        .tb-btn { 
+            background: rgba(255, 255, 255, 0.06); color: #ffffff; border: 1px solid rgba(255,255,255,0.08); 
+            padding: 8px 14px; cursor: pointer; font-weight: bold; border-radius: 8px; font-size: 13px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .tb-btn:hover { background: rgba(255, 255, 255, 0.15); }
+        
+        #active-apps-container { display: flex; gap: 6px; margin-left: 10px; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 10px; }
+        .app-tab { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; color: #fff; }
+        .app-tab:hover { background: #ff0055; }
+
+        .taskbar-center-dock {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 6px; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .dock-icon {
+            font-size: 22px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border-radius: 8px; transition: all 0.2s;
+        }
+        .dock-icon:hover { background: rgba(255,255,255,0.15); transform: scale(1.15); }
+
+        .weather-widget { font-size: 12px; color: #00ffcc; font-family: monospace; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 6px; }
+
+        /* Меню Пуск */
+        #start-menu {
+            position: fixed; bottom: 65px; left: 15px; width: 320px; background: rgba(20, 20, 30, 0.95);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            z-index: 1000001; backdrop-filter: blur(15px); padding: 15px; display: none; flex-direction: column; gap: 12px;
+        }
+        .start-header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; font-weight: bold; color: #ff0055; }
+        .start-item { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+        .start-item:hover { background: rgba(255,255,255,0.1); color: #00ffcc; }
+
+        /* ШІ Чат */
+        .ai-container { display: flex; flex-direction: column; height: 100%; background: #0f0f16; }
+        .ai-chat-log { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px; }
+        .ai-msg { max-width: 85%; padding: 10px 14px; border-radius: 10px; line-height: 1.4; }
+        .ai-msg.user { background: #ff0055; align-self: flex-end; color: white; }
+        .ai-msg.bot { background: #1f1f2e; align-self: flex-start; border-left: 3px solid #00ffcc; }
+        .ai-input-area { display: flex; padding: 10px; background: rgba(0,0,0,0.3); gap: 8px; }
+        .ai-input { flex-grow: 1; background: #1a1a26; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: white; padding: 8px 12px; outline: none; }
+
+        /* Блокнот / Провідник */
+        .explorer-layout { display: flex; flex-direction: column; height: 100%; padding: 15px; gap: 10px; }
+        .file-list { flex-grow: 1; background: #0f0f16; border-radius: 6px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
+        .file-item { padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; font-size: 13px; }
+        .file-item:hover { background: rgba(255,255,255,0.15); }
+        .notepad-textarea { width: 100%; height: 220px; background: #07070a; color: #fff; border: 1px solid #333; border-radius: 6px; padding: 10px; font-family: monospace; resize: none; outline: none; }
     </style>
 </head>
-<body class="mode-gaming theme-dark">
+<body>
 
-    <!-- ================= BIOS MENU ================= -->
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div id="loading-text">[ СИНХРОНІЗАЦІЯ ОСТАННЬОГО ОНОВЛЕННЯ... ]</div>
+    </div>
+
+    <!-- Меню Кліку Миші -->
+    <div id="context-menu">
+        <div class="context-item" onclick="createWindow('explorer')">📂 Відкрити Провідник файлів</div>
+        <div class="context-item" onclick="createWindow('shop')">🛒 Магазин Апгрейдів</div>
+        <div class="context-item" onclick="toggleRedTheme()">🔴 Увімкнути Червоний RGB-сетап</div>
+        <div class="context-item id-gaming-only" onclick="enableGamingWallpaper()" style="display:none;">🖼️ Увімкнути геймерський фон</div>
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:4px 0;">
+        <div class="context-item" onclick="triggerCinematicReboot()">🔄 Скинути до BIOS</div>
+    </div>
+
+    <!-- Пуск -->
+    <div id="start-menu">
+        <div class="start-header">🔷 sewiwewi OS: Final Edition</div>
+        <div class="start-item" onclick="toggleStartMenu(); createWindow('explorer');">📂 Провідник та Блокнот</div>
+        <div class="start-item" onclick="toggleStartMenu(); createWindow('shop');">🛒 Магазин кастомізації</div>
+        <div class="start-item" onclick="toggleStartMenu(); createWindow('console');">🖥️ Командний рядок</div>
+        <div class="start-item" onclick="toggleStartMenu(); createWindow('sewi_ai');">🤖 Шнерго-ШІ Асистент</div>
+        <div class="start-item" onclick="toggleStartMenu(); triggerCinematicReboot();">⚙️ Перезавантажити в BIOS</div>
+    </div>
+
+    <!-- БІОС -->
     <div id="bios-menu">
         <div class="bios-header">
-            <div class="bios-title">SEWIWEWI BIOS UTILITY - V3.0 MEME ENGINE</div>
-            <div style="color: #fff; font-size: 13px; margin-top: 5px;">Спеціальна збірка системи безпеки Пегуна</div>
+            <div class="bios-title">SEWIWEWI SYSTEM ULTIMATE BIOS v9.0</div>
+            <div style="color: #ffffff; font-size: 13px; margin-top: 5px; opacity: 0.7;">Фінальна стабільна збірка ядра. Оберіть режим:</div>
         </div>
         <div class="bios-content">
-            <div class="bios-option" onclick="bootSystem('joke')">
-                <div>
-                    <h3 style="margin:0 0 5px 0; color:#00ffcc;">👉 ЗАВАНТАЖИТИ: FUN MODE (Шуткова версія)</h3>
-                    <p style="margin:0; font-size:13px; opacity:0.8;">Папки-пастки, вірусні атаки спаму, анімована бомба та симулятор злого Пегуна.</p>
-                </div>
-            </div>
             <div class="bios-option" onclick="bootSystem('gaming')">
-                <div>
-                    <h3 style="margin:0 0 5px 0; color:#ff0055;">👉 ЗАВАНТАЖИТИ: GAMING MODE (Ігрова версія)</h3>
-                    <p style="margin:0; font-size:13px; opacity:0.8;">Робоче середовище, кастомізація заліза, зміна ДЕНЬ/НІЧ (Білий та Чорний режими).</p>
-                </div>
+                <h3 style="margin:0 0 5px 0; color:#00ffcc;">🎮 Boot Gaming Mode</h3>
+                <p style="margin:0; font-size:13px; opacity:0.8;">Максимальна продуктивність: Реакція, FPS Бустер, Кейси, Математика.</p>
+            </div>
+            <div class="bios-option" onclick="bootSystem('meme')">
+                <h3 style="margin:0 0 5px 0; color:#ff0055;">🤡 Boot Meme Mode (Рекомендовано)</h3>
+                <p style="margin:0; font-size:13px; opacity:0.8;">Повний функціонал: Провідник, Клікер Ячменю, sewiAI, Біржа, Сапер, Магазин.</p>
             </div>
         </div>
     </div>
 
-    <!-- ================= DESKTOP ================= -->
-    <div id="desktop">
-        <div id="apps-box" style="display: flex; gap: 20px; flex-wrap: wrap; width: 100%;"></div>
+    <div id="desktop" oncontextmenu="openContextMenu(event)" onclick="closeAllPopups()"></div>
 
-        <!-- ГОЛОВНЕ ВІКНО ДЛЯ ІГОР ТА ПРИКОЛІВ -->
-        <div id="main-win" class="window" onmousedown="focusWindow('main-win')">
-            <div class="window-header">
-                <span class="window-title" id="win-title">📄 Програма</span>
-                <div class="btn-group"><button class="win-btn close-btn" onclick="closeMainWindow()">✕</button></div>
-            </div>
-            <div class="window-content" id="win-body"></div>
+    <!-- ХУД Ячменю -->
+    <div id="roblox-balance-hud">
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <span class="hud-label">Баланс Ячменю</span>
+            <span class="hud-value" id="hud-barley-tokens">0</span>
         </div>
+        <div style="font-size: 26px;">🌾</div>
     </div>
 
-    <!-- ================= TASKBAR ================= -->
-    <div id="taskbar">
-        <div style="display: flex; gap: 12px; align-items: center;">
-            <button class="tb-btn" style="background: linear-gradient(135deg, #ff0055, #990033); color:white;" onclick="alert('sewiwewi OS Premium ready!')">🔷 sewiwewi</button>
-            <button class="tb-btn" style="color: #00ffcc; border-color: #00ffcc;" onclick="exitToBios()">⚙️ BIOS меню</button>
+    <!-- Нижній Таскбар -->
+    <div id="taskbar" onclick="event.stopPropagation()">
+        <div class="tb-section">
+            <button class="tb-btn" style="background: linear-gradient(135deg, #ff0055, #990033); border:none;" onclick="toggleStartMenu()">🔷 Пуск</button>
+            <div id="active-apps-container"></div>
         </div>
-        <div style="display: flex; gap: 12px; align-items: center;">
-            <button id="theme-toggle-btn" class="tb-btn" onclick="toggleTheme()">🌓 Змінити тему</button>
-            <div id="clock" style="font-family: monospace; font-weight: bold; background: rgba(0,0,0,0.2); padding: 6px 12px; border-radius: 6px;">00:00:00</div>
+        <div class="taskbar-center-dock" id="dock-container"></div>
+        <div class="tb-section">
+            <div class="weather-widget" id="weather-display">☀️ +24°C</div>
+            <button class="tb-btn" style="color: #00ffcc; border-color: rgba(0,255,204,0.3);" onclick="createWindow('sewi_ai')">🤖 AI</button>
+            <button class="tb-btn" style="font-family:monospace;" id="clock">00:00:00</button>
         </div>
     </div>
 
     <script>
         let zIndexCounter = 100;
-        let systemMode = 'gaming';
-        let bombTimerInterval = null;
-        let pigeonInterval = null;
-        let pigeonRage = 0;
+        let windowCount = 0;
+        let currentOS = ''; 
 
-        function bootSystem(mode) {
-            systemMode = mode;
-            document.getElementById('bios-menu').style.display = 'none';
-            document.getElementById('desktop').style.display = 'flex';
-            resetStates();
+        // Завантаження збережених даних
+        let barleyCount = parseInt(localStorage.getItem('sewi_barley')) || 0;
+        let clickPower = parseInt(localStorage.getItem('sewi_power')) || 1;
+        let clickUpgradeCost = parseInt(localStorage.getItem('sewi_ucost')) || 15;
+        let autoFarmers = parseInt(localStorage.getItem('sewi_farmers')) || 0;
+        let autoFarmerCost = parseInt(localStorage.getItem('sewi_fcost')) || 40;
+        let marketPrice = 20;
+        let mathAns = 12;
 
-            if(mode === 'joke') {
-                document.body.className = "mode-joke";
-                document.getElementById('theme-toggle-btn').style.display = 'none';
-                renderJokeIcons();
-            } else {
-                document.body.className = "mode-gaming theme-dark";
-                document.getElementById('theme-toggle-btn').style.display = 'block';
-                renderGamingIcons();
-            }
+        // База текстових файлів
+        let savedFiles = JSON.parse(localStorage.getItem('sewi_files')) || {
+            "instructions.txt": "Ласкаво просимо до фінальної версії sewiwewi OS! Тут можна зберігати нотатки.",
+            "reallyworld_plans.txt": "План на день: Зайти на сервер, нафармити ресурсів, оновити префікс."
+        };
+
+        let activeDragWin = null;
+        let dragStartX = 0, dragStartY = 0;
+        let winStartX = 0, winStartY = 0;
+
+        function saveData() {
+            localStorage.setItem('sewi_barley', barleyCount);
+            localStorage.setItem('sewi_power', clickPower);
+            localStorage.setItem('sewi_ucost', clickUpgradeCost);
+            localStorage.setItem('sewi_farmers', autoFarmers);
+            localStorage.setItem('sewi_fcost', autoFarmerCost);
+            localStorage.setItem('sewi_files', JSON.stringify(savedFiles));
         }
 
-        function exitToBios() {
-            resetStates();
+        function bootSystem(osType) {
+            currentOS = osType;
+            document.getElementById('bios-menu').style.display = 'none';
+            
+            const desktop = document.getElementById('desktop');
+            desktop.style.display = 'flex';
+            desktop.innerHTML = ''; 
+
+            const gamingOpt = document.querySelector('.id-gaming-only');
+            const hud = document.getElementById('roblox-balance-hud');
+            const dock = document.getElementById('dock-container');
+
+            dock.innerHTML = '';
+            document.getElementById('active-apps-container').innerHTML = '';
+
+            if(osType === 'gaming') {
+                desktop.className = 'bg-black'; 
+                gamingOpt.style.display = 'flex'; 
+                hud.style.display = 'none';
+
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'game_reaction\')"><span class="icon-emoji">⚡</span><span>Реакція</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'game_fps\')"><span class="icon-emoji">🚀</span><span>Тест FPS</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'game_loot\')"><span class="icon-emoji">📦</span><span>Кейси</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'game_math\')"><span class="icon-emoji">🧮</span><span>Математика</span></div>';
+            } else if(osType === 'meme') {
+                desktop.className = 'bg-meme'; 
+                gamingOpt.style.display = 'none'; 
+                hud.style.display = 'flex';
+
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'explorer\')"><span class="icon-emoji">📂</span><span>Провідник</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'sewi_ai\')"><span class="icon-emoji">🤖</span><span>sewiAI</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'clicker\')"><span class="icon-emoji">🌾</span><span>Клікер V2</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'shop\')"><span class="icon-emoji">🛒</span><span>Магазин</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'console\')"><span class="icon-emoji">🖥️</span><span>Консоль</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'market\')"><span class="icon-emoji">📈</span><span>Біржа</span></div>';
+                desktop.innerHTML += '<div class="icon" onclick="createWindow(\'game_mines\')"><span class="icon-emoji">💣</span><span>Сапер</span></div>';
+            }
+            syncClickerData();
+            setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 800);
+        }
+
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function closeAllPopups() {
+            document.getElementById('start-menu').style.display = 'none';
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        function toggleRedTheme() { document.body.classList.toggle('red-rgb-theme'); document.getElementById('context-menu').style.display = 'none'; }
+        function enableGamingWallpaper() { if(currentOS === 'gaming') document.getElementById('desktop').className = 'bg-gaming'; document.getElementById('context-menu').style.display = 'none'; }
+
+        function triggerCinematicReboot() {
+            closeAllPopups();
+            document.querySelectorAll('.window').forEach(win => win.remove());
             document.getElementById('desktop').style.display = 'none';
+            document.getElementById('roblox-balance-hud').style.display = 'none';
             document.getElementById('bios-menu').style.display = 'flex';
         }
 
-        function resetStates() {
-            closeMainWindow();
-            clearInterval(bombTimerInterval);
-            clearInterval(pigeonInterval);
-            document.body.classList.remove('shake-screen');
-            document.querySelectorAll('.spam-win').forEach(el => el.remove());
+        function openContextMenu(e) {
+            e.preventDefault();
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.top = e.clientY + 'px';
+            menu.style.left = e.clientX + 'px';
         }
 
-        function toggleTheme() {
-            if(systemMode !== 'gaming') return;
-            if(document.body.classList.contains('theme-dark')) {
-                document.body.classList.replace('theme-dark', 'theme-light');
-            } else {
-                document.body.classList.replace('theme-dark', 'theme-light' ? 'theme-dark' : 'theme-light');
+        function createWindow(type) {
+            const existingWin = document.querySelector(`.window[data-game-type="${type}"]`);
+            if (existingWin) { zIndexCounter += 2; existingWin.style.zIndex = zIndexCounter; return; }
+
+            windowCount++; zIndexCounter += 2;
+            const win = document.createElement('div');
+            win.id = `win-${windowCount}`; win.className = 'window';
+            win.setAttribute('data-game-type', type); win.style.zIndex = zIndexCounter;
+            
+            const offset = (windowCount % 6) * 22;
+            win.style.top = `${60 + offset}px`; win.style.left = `${90 + offset}px`;
+
+            let titleText = ''; let contentHtml = '';
+
+            if (type === 'sewi_ai') {
+                titleText = 'sewiAI Final 🤖';
+                contentHtml = `
+                    <div class="ai-container">
+                        <div class="ai-chat-log" id="ai-log-${win.id}">
+                            <div class="ai-msg bot">Привіт! Я твій фінальний асистент <b>sewiAI</b>. Я можу відкривати програми! Напиши: <i>"відкрий консоль"</i>, <i>"запусти сапер"</i> або <i>"хак"</i>.</div>
+                        </div>
+                        <div class="ai-input-area">
+                            <input type="text" class="ai-input" id="ai-in-${win.id}" placeholder="Введіть команду..." onkeydown="handleAiMessage(event, '${win.id}')">
+                            <button class="action-btn" onclick="sendAiButton('${win.id}')">🖨️</button>
+                        </div>
+                    </div>`;
             }
-        }
+            else if (type === 'explorer') {
+                titleText = 'Провідник файлів та Блокнот 📂';
+                contentHtml = `
+                    <div class="explorer-layout">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="new-file-name" placeholder="Назва файлу.txt" style="background:#111; color:#fff; border:1px solid #44; padding:5px; border-radius:4px; flex-grow:1;">
+                            <button class="action-btn" onclick="createNewFile('${win.id}')">Створити файл</button>
+                        </div>
+                        <div class="file-list" id="files-container-${win.id}"></div>
+                        <textarea class="notepad-textarea" id="notepad-editor-${win.id}" placeholder="Оберіть файл для редагування..." disabled></textarea>
+                        <button class="action-btn" id="save-file-btn-${win.id}" style="background:#24b456;" onclick="saveCurrentFile('${win.id}')" disabled>Зберегти файл у систему</button>
+                    </div>`;
+            }
+            else if (type === 'shop') {
+                titleText = 'Магазин Кастомізації 🛒';
+                contentHtml = `
+                    <div class="game-layout">
+                        <h3>Купити преміум-теми за Ячмінь:</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px; width:80%;">
+                            <button class="action-btn" style="background:#9900ff;" onclick="buyCosmetic('neon', 50)">🌌 Неоновий Космос (Ціна: 50 🌾)</button>
+                            <button class="action-btn" style="background:#ff5f56;" onclick="buyCosmetic('red', 20)">🔴 Червоний RGB назавжди (Ціна: 20 🌾)</button>
+                        </div>
+                    </div>`;
+            }
+            else if (type === 'console') {
+                titleText = 'sewi_cmd Консоль 🖥️';
+                contentHtml = `
+                    <div class="console-box">
+                        <div class="console-log" id="log-${win.id}">Оболонка системи активована.\nВведіть 'help' для перегляду команд.\n\n</div>
+                        <div class="console-input-line"><span>sewi_os></span><input type="text" class="console-input" id="input-${win.id}" onkeydown="handleConsole(event, '${win.id}')" autofocus></div>
+                    </div>`;
+            }
+            else if (type === 'clicker') {
+                titleText = 'Клікер Ячменю V2 🌾';
+                contentHtml = `
+                    <div class="game-layout">
+                        <div style="font-size:20px; font-weight:bold;">Ячмінь: <span id="c-count-${win.id}">0</span> 🌾</div>
+                        <button class="game-btn" onclick="clickBarleyEngine('${win.id}')">🌾</button>
+                        <div style="font-size:12px; opacity:0.8;">Сила кліку: <span id="c-power-${win.id}">1</span></div>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <button class="action-btn" style="background:#24b456;" onclick="upgradeClick('${win.id}')">Удар х2 (Ціна: <span id="c-ucost-${win.id}">15</span>)</button>
+                            <button class="action-btn" style="background:#ffbd2e; color:#000000;" onclick="buyFarmer('${win.id}')">+1 Фермер (Ціна: <span id="c-fcost-${win.id}">40</span>)</button>
+                        </div>
+                    </div>`;
+            }
+            else if (type === 'market') {
+                titleText = 'Біржа 📈';
+                contentHtml = `<div class="game-layout"><h2>Курс ячменю: <span id="m-price-${win.id}">${marketPrice}</span> коїнів</h2><button class="action-btn" onclick="sellAllBarley()">Продати все</button></div>`;
+            }
+            else if (type === 'game_mines') {
+                titleText = 'Сапер 💣';
+                contentHtml = `<div class="game-layout"><div id="mine-status-${win.id}">Вгадай безпечну зону!</div><div style="display:flex; gap:10px;"><button class="action-btn" onclick="checkMine(1, '${win.id}')">Зона 1</button><button class="action-btn" onclick="checkMine(2, '${win.id}')">Зона 2</button></div></div>`;
+            }
+            else if (type === 'game_reaction') {
+                titleText = 'Реакція ⚡';
+                contentHtml = `<div class="game-layout"><div id="rc-status-${win.id}">Натисни старт!</div><button class="action-btn" id="rc-btn-${win.id}" onclick="clickReaction('${win.id}')">Запустити</button></div>`;
+            } else if (type === 'game_fps') {
+                titleText = 'Тест FPS 🚀';
+                contentHtml = `<div class="game-layout"><div style="font-size:32px;"><span id="fps-${win.id}">60</span> FPS</div><button class="action-btn" onclick="boostFps('${win.id}')">Розігнати</button></div>`;
+            } else if (type === 'game_loot') {
+                titleText = 'Кейси 📦';
+                contentHtml = `<div class="game-layout"><div id="lt-${win.id}">Відкрий кейс!</div><button class="action-btn" onclick="openLootCase('${win.id}')">Відкрити</button></div>`;
+            } else if (type === 'game_math') {
+                titleText = 'Математика 🧮';
+                contentHtml = `<div class="game-layout"><div id="mq-${win.id}">5 + 7 = ?</div><input type="number" id="ma-${win.id}" style="width:100px;"><button class="action-btn" onclick="checkMathAns('${win.id}')">ОК</button></div>`;
+            }
 
-        /* --- ГЕНЕРАЦІЯ ІКОНОК ДЛЯ РЕЖИМІВ --- */
-        function renderGamingIcons() {
-            const box = document.getElementById('apps-box');
-            box.innerHTML = `
-                <div class="icon" onclick="openGamingApp('specs')"><span class="icon-emoji">🖥️</span><span>Залізо ПК</span></div>
-                <div class="icon" onclick="openGamingApp('google')"><span class="icon-emoji">🌐</span><span>Google</span></div>
+            win.innerHTML = `
+                <div class="window-header" onmousedown="startDrag(event, '${win.id}')">
+                    <span class="window-title">📁 ${titleText}</span>
+                    <div style="display:flex; align-items:center;">
+                        <button class="win-btn max-btn" onclick="maximizeWin('${win.id}')">🔲</button>
+                        <button class="win-btn cls-btn" onclick="closeWin('${win.id}')">✕</button>
+                    </div>
+                </div>
+                <div class="window-content">${contentHtml}</div>
             `;
+
+            win.addEventListener('mousedown', () => { zIndexCounter += 2; win.style.zIndex = zIndexCounter; });
+            document.getElementById('desktop').appendChild(win);
+
+            updateTaskbarApps();
+            if (type === 'explorer') renderFiles(win.id);
+            syncClickerData();
         }
 
-        function renderJokeIcons() {
-            const box = document.getElementById('apps-box');
-            box.innerHTML = `
-                <div class="icon" onclick="openJokeApp('trap')"><span class="icon-emoji">🔞</span><span>СЕКРЕТНИЙ ЗЛИВ</span></div>
-                <div class="icon" onclick="openJokeApp('bomb')"><span class="icon-emoji">💣</span><span>Анімована Бомба</span></div>
-                <div class="icon" onclick="openJokeApp('pigeon')"><span class="icon-emoji">🕊️</span><span>Симулятор Пегуна</span></div>
-            `;
+        function closeWin(id) { document.getElementById(id).remove(); updateTaskbarApps(); }
+        function maximizeWin(id) { document.getElementById(id).classList.toggle('maximize'); }
+
+        function startDrag(e, id) {
+            const win = document.getElementById(id); if (win.classList.contains('maximize')) return;
+            activeDragWin = win; dragStartX = e.clientX; dragStartY = e.clientY;
+            winStartX = win.offsetLeft; winStartY = win.offsetTop;
+            zIndexCounter += 2; win.style.zIndex = zIndexCounter; e.preventDefault();
         }
 
-        /* --- ІГРОВІ / РОБОЧІ ДОДАТКИ --- */
-        function openGamingApp(type) {
-            const win = document.getElementById('main-win');
-            const title = document.getElementById('win-title');
-            const body = document.getElementById('win-body');
-            
-            if(type === 'specs') {
-                title.innerText = "🖥️ Моніторинг Системи";
-                body.innerHTML = `
-                    <div style="line-height:1.8; font-family:monospace; padding: 10px;">
-                        <h3 style="color:#ff0055; margin:0 0 15px 0;">Технічні характеристики збірки:</h3>
-                        • CPU: AMD Ryzen 5 1600 (Шість ядер, стабільний розгін)<br>
-                        • GPU Заплановано: NVIDIA GeForce RTX 4060 Ti 8GB (ASUS Dual)<br>
-                        • Поточна GPU: Radeon RX 480 Series<br>
-                        • Motherboard: ASRock B450M-HDV<br>
-                        • Стан термопасти: Надійно під контролем сусіда 🛠️
-                    </div>`;
-            } else if(type === 'google') {
-                title.innerText = "🌐 Пошук Google Core";
-                body.innerHTML = `
-                    <div style="text-align:center; padding-top:40px;">
-                        <h2 style="font-size:36px; margin-bottom:20px;"><span style="color:#4285F4">G</span><span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span><span style="color:#34A853">l</span><span style="color:#EA4335">e</span></h2>
-                        <input type="text" placeholder="Запит для пошуку..." style="width:70%; padding:10px; border-radius:20px; border:1px solid #ccc; outline:none; font-size:14px; background:rgba(0,0,0,0.05); color:inherit;"><br><br>
-                        <button class="tb-btn" onclick="alert('Пошук завершено! Багів не виявлено.')">Шукати у всесвіті</button>
-                    </div>`;
-            }
-            showMainWindow();
+        document.addEventListener('mousemove', (e) => {
+            if (!activeDragWin) return;
+            activeDragWin.style.left = (winStartX + (e.clientX - dragStartX)) + "px";
+            activeDragWin.style.top = (winStartY + (e.clientY - dragStartY)) + "px";
+        });
+        document.addEventListener('mouseup', () => { activeDragWin = null; });
+
+        function updateTaskbarApps() {
+            const container = document.getElementById('active-apps-container'); container.innerHTML = '';
+            document.querySelectorAll('.window').forEach(win => {
+                const tab = document.createElement('div'); tab.className = 'app-tab';
+                tab.innerText = win.querySelector('.window-title').innerText.replace('📁 ', '');
+                tab.onclick = () => { zIndexCounter += 2; win.style.zIndex = zIndexCounter; };
+                container.appendChild(tab);
+            });
         }
 
-        /* --- ШУТКОВІ ДОДАТКИ ТА ВІРУСИ --- */
-        function openJokeApp(type) {
-            resetStates();
-            const win = document.getElementById('main-win');
-            const title = document.getElementById('win-title');
-            const body = document.getElementById('win-body');
-
-            if(type === 'trap') {
-                title.innerText = "🚨 КАТАСТРОФІЧНА ПОМИЛКА СИСТЕМИ";
-                body.innerHTML = `
-                    <div style="text-align:center; padding:20px;">
-                        <h3 style="color:#ff3333; font-size:20px;">🔥 ТИ ВСЕ-ТАКИ НАТИСНУВ! 🔥</h3>
-                        <p style="margin-bottom:20px;">Тепер твій робочий стіл буде атаковано спам-матрицею!</p>
-                        <button class="feed-btn" style="background:#ff3333; color:#fff;" onclick="triggerSpamVirus()">⚠️ АКТИВУВАТИ АТАКУ ⚠️</button>
-                        <button class="tb-btn" style="margin-left:10px;" onclick="resetStates()">❌ Очистити систему</button>
-                    </div>`;
-            } 
-            else if(type === 'bomb') {
-                title.innerText = "💣 АНІМОВАНА БОМБА УПОВІЛЬНЕНОЇ ДІЇ";
-                let timeLeft = 5;
-                body.innerHTML = `
-                    <div class="bomb-container">
-                        <div class="bomb-icon" id="b-icon">💣</div>
-                        <div class="bomb-timer" id="b-timer">05:00</div>
-                        <p style="font-weight:bold; margin:0;">Встигни натиснути кнопку, поки не стався великий БУМ!</p>
-                        <button class="feed-btn" onclick="defuseBomb()">ЗНЕШКОДИТИ БОМБУ</button>
-                    </div>`;
-                
-                bombTimerInterval = setInterval(() => {
-                    timeLeft--;
-                    document.getElementById('b-timer').innerText = "0" + timeLeft + ":00";
-                    if(timeLeft <= 2) {
-                        document.getElementById('b-icon').style.animationDuration = '0.3s';
-                    }
-                    if(timeLeft <= 0) {
-                        clearInterval(bombTimerInterval);
-                        triggerExplosion();
-                    }
-                }, 1000);
-            } 
-            else if(type === 'pigeon') {
-                title.innerText = "🌾 СИМУЛЯТОР ЗЛОГО ПЕГУНА V1.0";
-                pigeonRage = 20;
-                body.innerHTML = `
-                    <div class="pigeon-game">
-                        <div class="pigeon-sprite" id="p-sprite">🕊️</div>
-                        <div style="font-weight:bold; font-size:16px;" id="p-status">Статус: Пегун починає хотіти їсти... ⏳</div>
-                        <div class="rage-bar-bg"><div class="rage-bar-fill" id="rage-fill" style="width: 20%;"></div></div>
-                        <button class="feed-btn" onclick="feedPigeon()">🌾 НАСИПАТИ ЯЧМЕНЮ 🌾</button>
-                    </div>`;
-
-                pigeonInterval = setInterval(() => {
-                    pigeonRage += 8;
-                    if(pigeonRage > 100) pigeonRage = 100;
-                    document.getElementById('rage-fill').style.width = pigeonRage + '%';
-
-                    if(pigeonRage >= 60 && pigeonRage < 90) {
-                        document.getElementById('p-sprite').innerText = "🦅";
-                        document.getElementById('p-status').innerText = "Статус: Пегун сердиться, де твій ячмінь?! 😡";
-                    } else if(pigeonRage >= 90) {
-                        document.getElementById('p-sprite').innerText = "🤬";
-                        document.getElementById('p-status').innerText = "СТАТУС: ПЕГУН У ПОВНІЙ ЛЮТІ! ВІН КЛЮЄ ЕКРАН!";
-                        document.body.classList.add('shake-screen');
-                        if(Math.random() > 0.4) spawnSingleSpam("Курлик! Віддай ячмінь!");
-                    }
-                }, 1000);
-            }
-            showMainWindow();
+        // Логіка Блокнота та Файлів
+        let selectedFileName = "";
+        function renderFiles(winId) {
+            const container = document.getElementById(`files-container-${winId}`);
+            container.innerHTML = "";
+            Object.keys(savedFiles).forEach(name => {
+                const item = document.createElement('div'); item.className = 'file-item';
+                item.innerHTML = `<span>📄 ${name}</span> <span style="color:#ff5f56; cursor:pointer;" onclick="deleteFile('${name}', '${winId}'); event.stopPropagation();">Видалити</span>`;
+                item.onclick = () => openFile(name, winId);
+                container.appendChild(item);
+            });
+        }
+        function createNewFile(winId) {
+            const nameInput = document.getElementById('new-file-name');
+            let name = nameInput.value.trim();
+            if(!name) return;
+            if(!name.endsWith(".txt")) name += ".txt";
+            savedFiles[name] = ""; saveData(); renderFiles(winId); nameInput.value = "";
+        }
+        function openFile(name, winId) {
+            selectedFileName = name;
+            const ed = document.getElementById(`notepad-editor-${winId}`);
+            const btn = document.getElementById(`save-file-btn-${winId}`);
+            ed.value = savedFiles[name]; ed.disabled = false; btn.disabled = false;
+        }
+        function saveCurrentFile(winId) {
+            if(!selectedFileName) return;
+            savedFiles[selectedFileName] = document.getElementById(`notepad-editor-${winId}`).value;
+            saveData(); alert("Файл збережено в пам'ять системи!");
+        }
+        function deleteFile(name, winId) {
+            delete savedFiles[name]; saveData(); renderFiles(winId);
         }
 
-        /* --- ЛОГІКА ВІРУСІВ --- */
-        function triggerSpamVirus() {
-            for(let i=0; i<15; i++) {
-                setTimeout(() => {
-                    if(systemMode === 'joke') {
-                        spawnSingleSpam("⚠️ СИСТЕМНИЙ ЗБІЙ! МЕМ ХАК!");
-                    }
-                }, i * 180);
-            }
+        // Магазин
+        function buyCosmetic(type, cost) {
+            if(barleyCount >= cost) {
+                barleyCount -= cost; saveData(); syncClickerData();
+                if(type === 'neon') document.getElementById('desktop').className = 'bg-neon';
+                if(type === 'red') document.body.classList.add('red-rgb-theme');
+                alert("Успішно куплено та застосовано!");
+            } else { alert("Не вистачає ячменю!"); }
         }
 
-        function spawnSingleSpam(text) {
-            const spam = document.createElement('div');
-            spam.className = 'spam-win';
-            spam.innerText = text;
-            spam.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-            spam.style.left = Math.random() * (window.innerWidth - 220) + 'px';
-            
-            const closeBtn = document.createElement('div');
-            closeBtn.innerText = "✕";
-            closeBtn.style.cssText = "position:absolute; top:2px; right:5px; cursor:pointer; color:red; font-size:11px;";
-            closeBtn.onclick = () => spam.remove();
-            
-            spam.appendChild(closeBtn);
-            document.body.appendChild(spam);
+        // ШІ Асистент
+        function handleAiMessage(e, winId) { if (e.key === 'Enter') sendAiButton(winId); }
+        function sendAiButton(winId) {
+            const input = document.getElementById(`ai-in-${winId}`); const text = input.value.trim(); if (!text) return;
+            const log = document.getElementById(`ai-log-${winId}`); log.innerHTML += `<div class="ai-msg user">${text}</div>`;
+            input.value = ''; log.scrollTop = log.scrollHeight;
+            setTimeout(() => {
+                let r = text.toLowerCase(); let reply = "Я розпізнав запит. Для відкриття програм напиши 'відкрий консоль' або 'запусти сапер'.";
+                if(r.includes('консоль')) { setTimeout(() => createWindow('console'), 200); reply = "🖥️ Консоль активована."; }
+                else if(r.includes('сапер')) { setTimeout(() => createWindow('game_mines'), 200); reply = "💣 Сапер запущено."; }
+                else if(r.includes('провідник') || r.includes('блокнот')) { setTimeout(() => createWindow('explorer'), 200); reply = "📂 Провідник файлів відкрито."; }
+                else if(r.includes('хак')) { barleyCount += 150; syncClickerData(); reply = "⚔️ Систему ReallyWorld зламано! Нараховано +150 ячменю."; }
+                log.innerHTML += `<div class="ai-msg bot">${reply}</div>`; log.scrollTop = log.scrollHeight;
+            }, 400);
         }
 
-        function defuseBomb() {
-            clearInterval(bombTimerInterval);
-            alert("🎯 Бомбу успішно знешкоджено! Міша врятував систему sewiwewi OS!");
-            resetStates();
+        // Консоль
+        function handleConsole(e, winId) {
+            if (e.key !== 'Enter') return;
+            const input = document.getElementById(`input-${winId}`); const log = document.getElementById(`log-${winId}`);
+            const cmd = input.value.trim().toLowerCase(); log.innerText += `sewi_os> ${input.value}\n`; input.value = '';
+            if (cmd === 'help') log.innerText += "Команди:\n • hardware - параметри ПК\n • give_barley - отримати бонус\n • clear - очистити\n\n";
+            else if (cmd === 'hardware') log.innerText += "⚙️ PC: Ryzen 5 1600 | RX 480 -> Ціль: RTX 4060 Ti\n\n";
+            else if (cmd === 'give_barley') { barleyCount += 100; log.innerText += "🌾 Бонус +100 ячменю!\n\n"; syncClickerData(); }
+            else if (cmd === 'clear') log.innerText = '';
+            else log.innerText += `❌ Помилка команди '${cmd}'.\n\n`;
+            log.scrollTop = log.scrollHeight;
         }
 
-        function triggerExplosion() {
-            document.body.classList.add('shake-screen');
-            document.getElementById('win-body').innerHTML = `
-                <div style="text-align:center; color:#ff3333; margin:auto; font-family:monospace;">
-                    <h1 style="font-size:70px; animation: popUp 0.3s;">💥 БУ-У-УМ! 💥</h1>
-                    <h2>Мемний вірус підірвав твою систему!</h2>
-                    <p>Натисни кнопку нижче або зайди в BIOS для повного відновлення ядер.</p>
-                    <button class="feed-btn" onclick="resetStates()">🔄 Відновити вікна</button>
-                </div>`;
+        // Клікер
+        function clickBarleyEngine(id) { barleyCount += clickPower; syncClickerData(); }
+        function upgradeClick(id) { if (barleyCount >= clickUpgradeCost) { barleyCount -= clickUpgradeCost; clickPower *= 2; clickUpgradeCost *= 3; syncClickerData(); } }
+        function buyFarmer(id) { if (barleyCount >= autoFarmerCost) { barleyCount -= autoFarmerCost; autoFarmers++; autoFarmerCost = Math.floor(autoFarmerCost * 1.5); syncClickerData(); } }
+        function sellAllBarley() { if (barleyCount > 0) { barleyCount = 0; syncClickerData(); alert("Все продано!"); } }
+        
+        function syncClickerData() {
+            saveData();
+            document.querySelectorAll('[id^="c-count-"]').forEach(el => el.innerText = barleyCount);
+            document.querySelectorAll('[id^="c-power-"]').forEach(el => el.innerText = clickPower);
+            document.querySelectorAll('[id^="c-ucost-"]').forEach(el => el.innerText = clickUpgradeCost);
+            document.querySelectorAll('[id^="c-fcost-"]').forEach(el => el.innerText = autoFarmerCost);
+            if(document.getElementById('hud-barley-tokens')) document.getElementById('hud-barley-tokens').innerText = barleyCount;
         }
+        setInterval(() => { if (autoFarmers > 0) { barleyCount += autoFarmers * 2; syncClickerData(); } }, 1000);
 
-        function feedPigeon() {
-            if(pigeonRage <= 0) return;
-            pigeonRage -= 25;
-            if(pigeonRage < 0) pigeonRage = 0;
-            document.getElementById('rage-fill').style.width = pigeonRage + '%';
-            
-            if(pigeonRage < 60) {
-                document.getElementById('p-sprite').innerText = "🕊️";
-                document.getElementById('p-status').innerText = "Статус: Пегун задоволений, він їсть ячмінь. 🥰";
-                document.body.classList.remove('shake-screen');
-            }
-        }
+        // Інші міні-ігри
+        function checkMine(z, id) { document.getElementById(`mine-status-${id}`).innerText = Math.random() > 0.5 ? "💎 +5 Ячменю" : "💥 Бум"; barleyCount += 5; syncClickerData(); }
+        let rcStart; function clickReaction(id) { const btn = document.getElementById(`rc-btn-${id}`); if(btn.innerText==="Запустити") { btn.innerText="ТИСНИ!"; rcStart=Date.now(); } else { document.getElementById(`rc-status-${id}`).innerText=`Реакція: ${Date.now()-rcStart}мс`; btn.innerText="Запустити"; } }
+        function boostFps(id) { document.getElementById(`fps-${id}`).innerText = "400"; }
+        function openLootCase(id) { document.getElementById(`lt-${id}`).innerText = "🔥 Мишка RGB"; }
+        function checkMathAns(id) { alert("Правильно!"); }
 
-        /* --- БАЗОВІ ФУНКЦІЇ ВІКОН --- */
-        function showMainWindow() {
-            const win = document.getElementById('main-win');
-            win.style.display = 'flex';
-            win.style.top = '10%';
-            win.style.left = '15%';
-            focusWindow('main-win');
-        }
-        function closeMainWindow() { document.getElementById('main-win').style.display = 'none'; }
-        function focusWindow(id) { zIndexCounter += 2; document.getElementById(id).style.zIndex = zIndexCounter; }
+        setInterval(() => { const w = ["☀️ +24°C", "🌧️ +14°C", "⚡ СТАБІЛЬНО"]; document.getElementById('weather-display').innerText = w[Math.floor(Math.random()*w.length)]; }, 5000);
+        function updateClock() { const d = new Date(); document.getElementById('clock').innerText = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ':' + d.getSeconds().toString().padStart(2,'0'); }
+        setInterval(updateClock, 1000); updateClock();
 
-        function updateClock() {
-            const d = new Date();
-            document.getElementById('clock').innerText = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0') + ':' + d.getSeconds().toString().padStart(2,'0');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        window.onload = function() { bootSystem('meme'); };
     </script>
 </body>
 </html>
